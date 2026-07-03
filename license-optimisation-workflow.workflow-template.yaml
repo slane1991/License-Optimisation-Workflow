@@ -1,0 +1,611 @@
+metadata:
+  version: '1'
+  dependencies:
+    apps:
+    - id: dynatrace.automations
+      version: ^1.3208.0
+    - id: dynatrace.davis.copilot.workflow.actions
+      version: ^1.4.0-preview.6
+    - id: dynatrace.email
+      version: ^1.10.7
+  inputs: []
+workflow:
+  title: License Optimisation Workflow
+  description: ''
+  schemaVersion: 4
+  trigger: {}
+  result: null
+  type: STANDARD
+  input: {}
+  hourlyExecutionLimit: 1000
+  guide: null
+  tasks:
+    create_report:
+      name: create_report
+      input:
+        config: disabled
+        prompt: 'You are creating a Dynatrace license optimisation email report using
+          the data provided below.
+
+          The data represents the last 30 days of license consumption and potential
+          optimisation opportunities across multiple Dynatrace licensing modules.
+
+          Your task is to analyse the supplied data and produce a meaningful, concise
+          email report for stakeholders. The report should focus on high-level insights,
+          quantified opportunities, and practical recommendations. Do not list every
+          individual finding unless the dataset is very small. Summarise patterns
+          and highlight only the most important examples.
+
+          A supporting Dynatrace dashboard is available for recipients to drill down
+          into full details, so the email should act as an executive summary and prioritisation
+          guide rather than a raw data dump.
+
+          Report audience:
+
+          Customer stakeholders
+
+          Dynatrace administrators
+
+          Platform / Observability owners
+
+          FinOps or license management stakeholders
+
+          Tone:
+
+          Professional
+
+          Clear
+
+          Action-oriented
+
+          Helpful, not alarmist
+
+          Avoid overly technical language unless needed
+
+          Report structure:
+
+          Email subject line
+
+          Create a short, clear subject line, for example:
+
+          “Dynatrace License Optimisation Report – Last 30 Days”
+
+          Executive summary
+
+          Provide a short summary of the main optimisation themes found across the
+          data.
+
+          Mention:
+
+          The assessment period is the last 30 days.
+
+          The report identifies potential optimisation opportunities, not automatic
+          recommendations.
+
+          The supporting dashboard can be used to review the full detail.
+
+          Overall opportunity summary
+
+          Summarise the opportunity areas found in the data. Include only areas where
+          relevant data exists.
+
+          Where possible, include totals such as:
+
+          Number of full-stack hosts with no detected monitored services
+
+          Total estimated GiB of memory represented by those hosts, if available
+
+          Total scanned billable volume from DQL queries
+
+          Number of dashboards/notebooks involved
+
+          Number of anomaly detectors involved
+
+          Number of synthetic monitors with optimisation potential
+
+          Number of possible duplicate synthetic monitor groups
+
+          Prioritised findings
+
+          Group findings into the following categories. Only include a category if
+          data is present.
+
+          A. Full-stack hosts with no monitored services
+
+          Explain that these hosts are currently monitored in full-stack mode but
+          have no detected monitored services during the assessment period.
+
+          Potential optimisation:
+
+          Review whether these hosts need full-stack monitoring.
+
+          If no application/service visibility is required, consider switching to
+          infrastructure-only monitoring.
+
+          Do not list all hosts.
+
+          Instead:
+
+          State the total number of affected hosts.
+
+          Highlight the top 3 highest GiB consuming hosts, if host-level memory data
+          is available.
+
+          Include host name, GiB, and any other useful identifying field if available.
+
+          B. Billable DQL queries in Anomaly Detection
+
+          Explain that anomaly detectors are executing DQL queries against billable
+          data types such as logs, traces, or events.
+
+          Potential optimisation:
+
+          Review whether each query needs to run at the current execution timing.
+
+          Consider adding an execution delay where appropriate.
+
+          Consider using OpenPipeline to convert frequently queried data into metrics
+          where suitable, as metrics have no query cost.
+
+          Summarise:
+
+          Number of anomaly detectors
+
+          Total scanned billable volume
+
+          Highest volume anomaly detectors
+
+          Owners, if available
+
+          Highlight the top 3 highest scanned volume anomaly detectors only.
+
+          C. Billable DQL queries in Dashboards and Notebooks
+
+          Analyse the separate datasets for logs, traces, and events queried from
+          Dashboards and Notebooks.
+
+          Explain that these queries scan billable data and can contribute to query
+          cost, especially when dashboards are frequently viewed.
+
+          Potential optimisation:
+
+          Review high-volume dashboard and notebook queries.
+
+          Prioritise dashboards with both high scanned volume and high usage.
+
+          Consider using OpenPipeline to convert frequently queried log, trace, or
+          event data into metrics where suitable, as metrics have no query cost.
+
+          Consider whether lower-cost aggregations or narrower query windows can be
+          used.
+
+          Summarise:
+
+          Total scanned billable volume by data type: logs, traces, events
+
+          Number of dashboards/notebooks involved
+
+          Number of users and views where available
+
+          Highest priority dashboards based on a combination of scanned volume and
+          usage
+
+          Highlight the top 3 dashboard/notebook opportunities only, prioritising:
+
+          Highest scanned billable volume
+
+          Highest view count
+
+          Highest number of users
+
+          Clear dashboard link availability
+
+          Include dashboard links where available.
+
+          D. Browser Synthetic monitor optimisation
+
+          Explain that browser synthetic monitors consume billable steps based on
+          execution frequency, number of locations, and steps per execution.
+
+          Potential optimisation:
+
+          For monitors with low or no failures, consider reducing execution frequency.
+
+          Consider reducing the number of execution locations where broad geographic
+          coverage is not required.
+
+          For monitors with extremely high failure rates, especially 90% or greater,
+          review whether the monitor is misconfigured, obsolete, or testing an unavailable
+          endpoint.
+
+          Summarise:
+
+          Number of browser synthetic monitors reviewed
+
+          Number of monitors with low failure / high availability and high billable
+          steps
+
+          Number of monitors with extremely high failure rates, if any
+
+          Total billable steps if available
+
+          Highlight:
+
+          Top 3 high billable-step monitors with strong availability / low failure
+          rates
+
+          Top 3 monitors with extreme failure rates, if present
+
+          E. Potential duplicate Synthetic monitors
+
+          Explain that some synthetic monitors may be testing the same URL and could
+          represent duplicate or overlapping coverage.
+
+          Potential optimisation:
+
+          Review monitors testing the same URL.
+
+          Where monitoring intent overlaps, consider consolidating coverage and disabling
+          duplicates.
+
+          Retain separate monitors where different locations, credentials, journeys,
+          or business purposes justify them.
+
+          Summarise:
+
+          Number of duplicate URL groups
+
+          Number of monitors involved
+
+          Highest priority duplicate groups based on number of monitors and billable
+          steps, if available
+
+          Highlight the top 3 duplicate URL groups only.
+
+          Recommended next actions
+
+          Provide practical next steps. Use a prioritised list, for example:
+
+          Review the highest GiB full-stack hosts with no services.
+
+          Review high-volume DQL queries from frequently used dashboards.
+
+          Review anomaly detectors with high scanned volume.
+
+          Tune synthetic monitors with high billable steps and consistently high availability.
+
+          Investigate duplicate synthetic monitor coverage.
+
+          Use the supporting dashboard to validate each recommendation before making
+          changes.
+
+          Important caveats
+
+          Include a short caveat section:
+
+          These are optimisation candidates, not automatic changes.
+
+          Some items may be intentionally configured this way for operational, compliance,
+          business-critical, or troubleshooting reasons.
+
+          Any monitoring mode changes should be validated with service owners before
+          implementation.
+
+          The dashboard should be used to confirm the full details.
+
+          Input data is provided through the additional context field.
+
+          Output only the final email report content.
+
+          Do not include analysis notes, hidden reasoning, JSON, markdown tables,
+          or raw input data dumps.
+
+          Use headings and concise bullet points where helpful.'
+        autoTrim: true
+        instruction: 'Create an executive-style Dynatrace license optimisation email
+          report from the supplied Workflow data.
+
+          Rules:
+
+          Assess only the last 30 days of data.
+
+          Do not list every raw finding.
+
+          Summarise totals, trends, and highest-priority opportunities.
+
+          Use the supporting dashboard link for drill-down rather than including exhaustive
+          detail.
+
+          Include only sections where relevant data exists.
+
+          If a dataset is empty, missing, or unclear, briefly say that no material
+          opportunity was identified for that area.
+
+          Do not invent values. If a total, owner, link, volume, host memory value,
+          view count, or availability rate is not present, omit it or state that it
+          was not available.
+
+          Treat all findings as candidates for review, not automatic changes.
+
+          Prioritisation logic:
+
+          Full-stack host opportunities: prioritise by highest GiB memory consumption.
+
+          Dashboard/Notebook DQL opportunities: prioritise by highest scanned billable
+          volume, then highest views, then highest users.
+
+          Anomaly Detection DQL opportunities: prioritise by highest scanned billable
+          volume.
+
+          Browser Synthetic opportunities: prioritise high billable steps with high
+          availability / low failure rates.
+
+          Synthetic failure review: highlight monitors with failure rates of 90% or
+          greater.
+
+          Duplicate Synthetic opportunities: prioritise URLs tested by the highest
+          number of monitors and/or highest total billable steps.
+
+          Formatting:
+
+          Write in clear email format.
+
+          Include a subject line.
+
+          Include an executive summary.
+
+          Include a prioritised findings section.
+
+          Include recommended next actions.
+
+          Include caveats.
+
+          Keep the tone professional, concise, and action-oriented.
+
+          Avoid long tables.
+
+          Use bullet points for readability.
+
+          Highlight no more than the top 3 examples per category unless there are
+          fewer than 3.
+
+          Include dashboard links where available.
+
+          End by directing recipients to the supporting dashboard for full details.'
+        supplementary: '{{ result(''browser_clickpath_usage'') }}{{ result(''query_host_data'')
+          }}{{ result(''dql_query_logs_usage'') }}{{ result(''anomaly_detection_query'')
+          }}{{ result(''dql_query_events_usage'') }}{{ result(''dql_query_traces_usage'')
+          }}{{ result(''duplicate_synthetics'') }}'
+      action: dynatrace.davis.copilot.workflow.actions:davis-copilot
+      position:
+        x: 0
+        y: 2
+      conditions:
+        states:
+          query_host_data: OK
+          dql_query_logs_usage: OK
+          duplicate_synthetics: OK
+          dql_query_events_usage: OK
+          dql_query_traces_usage: OK
+          anomaly_detection_query: OK
+          browser_clickpath_usage: OK
+      description: Prompt the Dynatrace Intelligence generative AI
+      predecessors:
+      - query_host_data
+      - anomaly_detection_query
+      - dql_query_logs_usage
+      - browser_clickpath_usage
+      - dql_query_traces_usage
+      - dql_query_events_usage
+      - duplicate_synthetics
+    query_host_data:
+      name: query_host_data
+      input:
+        query: "//Querys fullstack monitored hosts and checks if detected services\
+          \ are running as potential infrastructure only optimisation opportunities\n\
+          fetch dt.system.events, from: now() - 30d\n| filter event.kind == \"BILLING_USAGE_EVENT\"\
+          \ and event.type == \"Full-Stack Monitoring\"\n| dedup event.id\n| summarize\
+          \ billed_gibibyte = sum(billed_gibibyte_hours), by:{dt.entity.host}\n| fields\
+          \ host_id = dt.entity.host, host_name = entityAttr(dt.entity.host, \"entity.name\"\
+          ), billed_gibibyte\n| lookup[\n  fetch dt.entity.host, from: now() - 1h\n\
+          \  | fieldsAdd monitoringMode, tags\n  | filter monitoringMode == \"FULL_STACK\"\
+          \n  | fieldsAdd nr_of_services = arraySize(runs[dt.entity.service])\n  |\
+          \ fieldsAdd nr_of_services = if(isNull(nr_of_services), 0, else: nr_of_services)\n\
+          //  | filter nr_of_services == 0\n], sourceField: host_id, lookupField:\
+          \ id, fields: {nr_of_services, tags}\n| filter nr_of_services == 0\n| fieldsAdd\
+          \ Service_Detection = if(nr_of_services == 0, \"⚠️ No Services Detected\"\
+          , else: \"✅ Service Detected\")\n| fieldsRemove nr_of_services, tags\n|\
+          \ sort billed_gibibyte DESC"
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: 1
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    dql_query_logs_usage:
+      name: dql_query_logs_usage
+      input:
+        query: "fetch dt.system.events, from: now() - 30d, scanLimitGBytes: -1\n|\
+          \ filter event.kind == \"BILLING_USAGE_EVENT\" and event.type == \"Log Management\
+          \ & Analytics - Query\"\n| dedup event.id\n| filter in(client.application_context,\
+          \ \"dynatrace.dashboards\", \"dynatrace.notebooks\")\n| parse client.source,\
+          \ \"LD '/ui/' LD:app_type '/' STRING:document_id\"\n| parse client.source,\
+          \ \"'https://' LD '--' LD:tenant_id ('--' | '.') LD\"\n| filter isNotNull(document_id)\n\
+          | fieldsAdd period = \"current\"\n| summarize {\n    `Query volume` = sum(billed_bytes),\n\
+          \    `Views` = count(),\n    `Users` = countDistinct(user.email),\n    tenant\
+          \ = takeFirst(tenant_id)\n  }, by: {\n    document_id,\n    period,\n  \
+          \  client.application_context\n  }\n| summarize {\n    `Current Period`\
+          \ = sum(if(period == \"current\", `Query volume`, else: 0)),\n    `Current\
+          \ Period Views` = sum(if(period == \"current\", `Views`, else: 0)),\n  \
+          \  `Current Period Users` = sum(if(period == \"current\", `Users`, else:\
+          \ 0)),\n    tenant_id = takeFirst(tenant)    \n  }, by: { `DocumentId` =\
+          \ document_id, `Application` = client.application_context }\n| sort `Current\
+          \ Period` desc\n| limit 25\n| fieldsAdd `Document Link` = if(Application\
+          \ == \"dynatrace.dashboards\", \n    concat(\"https://\", tenant_id, \"\
+          .apps.dynatrace.com/ui/apps/dynatrace.dashboards/dashboard/\", `DocumentId`),\n\
+          \    else: concat(\"https://\", tenant_id, \".apps.dynatrace.com/ui/apps/dynatrace.notebooks/notebook/\"\
+          , `DocumentId`))\n| fieldsRemove tenant_id\n\n| fieldsAdd `Document Link`\
+          \ = concat(\"[Open](\", `Document Link`, \")\")\n| fieldsRemove \"Change\"\
+          \n\n\n| fieldsAdd Views = concat(toLong(`Current Period Views`))\n\n| fieldsAdd\
+          \ Users = concat(toLong(`Current Period Users`))\n| fieldsRemove `Current\
+          \ Period Users`, `Current Period Views`\n| fieldsRename `Query volume` =\
+          \ `Current Period`"
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: 0
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    duplicate_synthetics:
+      name: duplicate_synthetics
+      input:
+        query: "fetch dt.entity.http_check_step, from: now() - 30d\n| fields entity.name,\
+          \ dt.entity.http_check = belongs_to[`dt.entity.http_check`]\n| fields monitor_name\
+          \ = entityName(dt.entity.http_check), url = entity.name, entity_type = \"\
+          HTTP Monitor\"\n| append [\n    fetch dt.entity.synthetic_test\n    | fieldsAdd\
+          \ url\n    | fields monitor_name = entity.name, url, entity_type = \"Browser\
+          \ Monitor\"\n    | filter isNotNull(url)\n]\n| summarize by:{url, entity_type},\
+          \ {monitor_count = count(), monitors = collectDistinct(monitor_name)}\n\
+          | filter monitor_count > 1\n| sort monitor_count desc"
+        failOnEmptyResult: false
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: 3
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    dql_query_events_usage:
+      name: dql_query_events_usage
+      input:
+        query: "fetch dt.system.events, from: now() - 30d, scanLimitGBytes: -1\n|\
+          \ filter event.kind == \"BILLING_USAGE_EVENT\" and event.type == \"Events\
+          \ - Query\"\n| dedup event.id\n| filter in(client.application_context, \"\
+          dynatrace.dashboards\", \"dynatrace.notebooks\")\n| parse client.source,\
+          \ \"LD '/ui/' LD:app_type '/' STRING:document_id\"\n| parse client.source,\
+          \ \"'https://' LD '--' LD:tenant_id ('--' | '.') LD\"\n| filter isNotNull(document_id)\n\
+          | fieldsAdd period = \"current\"\n| summarize {\n    `Query volume` = sum(billed_bytes),\n\
+          \    `Views` = count(),\n    `Users` = countDistinct(user.email),\n    tenant\
+          \ = takeFirst(tenant_id)\n  }, by: {\n    document_id,\n    period,\n  \
+          \  client.application_context\n  }\n| summarize {\n    `Current Period`\
+          \ = sum(if(period == \"current\", `Query volume`, else: 0)),\n    `Current\
+          \ Period Views` = sum(if(period == \"current\", `Views`, else: 0)),\n  \
+          \  `Current Period Users` = sum(if(period == \"current\", `Users`, else:\
+          \ 0)),\n    tenant_id = takeFirst(tenant)    \n  }, by: { `DocumentId` =\
+          \ document_id, `Application` = client.application_context }\n| sort `Current\
+          \ Period` desc\n| limit 25\n| fieldsAdd `Document Link` = if(Application\
+          \ == \"dynatrace.dashboards\", \n    concat(\"https://\", tenant_id, \"\
+          .apps.dynatrace.com/ui/apps/dynatrace.dashboards/dashboard/\", `DocumentId`),\n\
+          \    else: concat(\"https://\", tenant_id, \".apps.dynatrace.com/ui/apps/dynatrace.notebooks/notebook/\"\
+          , `DocumentId`))\n| fieldsRemove tenant_id\n\n| fieldsAdd `Document Link`\
+          \ = concat(\"[Open](\", `Document Link`, \")\")\n| fieldsRemove \"Change\"\
+          \n\n\n| fieldsAdd Views = concat(toLong(`Current Period Views`))\n\n| fieldsAdd\
+          \ Users = concat(toLong(`Current Period Users`))\n| fieldsRemove `Current\
+          \ Period Users`, `Current Period Views`\n| fieldsRename `Query volume` =\
+          \ `Current Period`"
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: 2
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    dql_query_traces_usage:
+      name: dql_query_traces_usage
+      input:
+        query: "fetch dt.system.events, from: now() - 30d, scanLimitGBytes: -1\n|\
+          \ filter event.kind == \"BILLING_USAGE_EVENT\" and event.type == \"Traces\
+          \ - Query\"\n| dedup event.id\n| filter in(client.application_context, \"\
+          dynatrace.dashboards\", \"dynatrace.notebooks\")\n| parse client.source,\
+          \ \"LD '/ui/' LD:app_type '/' STRING:document_id\"\n| parse client.source,\
+          \ \"'https://' LD '--' LD:tenant_id ('--' | '.') LD\"\n| filter isNotNull(document_id)\n\
+          | fieldsAdd period = \"current\"\n| summarize {\n    `Query volume` = sum(billed_bytes),\n\
+          \    `Views` = count(),\n    `Users` = countDistinct(user.email),\n    tenant\
+          \ = takeFirst(tenant_id)\n  }, by: {\n    document_id,\n    period,\n  \
+          \  client.application_context\n  }\n| summarize {\n    `Current Period`\
+          \ = sum(if(period == \"current\", `Query volume`, else: 0)),\n    `Current\
+          \ Period Views` = sum(if(period == \"current\", `Views`, else: 0)),\n  \
+          \  `Current Period Users` = sum(if(period == \"current\", `Users`, else:\
+          \ 0)),\n    tenant_id = takeFirst(tenant)    \n  }, by: { `DocumentId` =\
+          \ document_id, `Application` = client.application_context }\n| sort `Current\
+          \ Period` desc\n| limit 25\n| fieldsAdd `Document Link` = if(Application\
+          \ == \"dynatrace.dashboards\", \n    concat(\"https://\", tenant_id, \"\
+          .apps.dynatrace.com/ui/apps/dynatrace.dashboards/dashboard/\", `DocumentId`),\n\
+          \    else: concat(\"https://\", tenant_id, \".apps.dynatrace.com/ui/apps/dynatrace.notebooks/notebook/\"\
+          , `DocumentId`))\n| fieldsRemove tenant_id\n\n| fieldsAdd `Document Link`\
+          \ = concat(\"[Open](\", `Document Link`, \")\")\n| fieldsRemove \"Change\"\
+          \n\n\n| fieldsAdd Views = concat(toLong(`Current Period Views`))\n\n| fieldsAdd\
+          \ Users = concat(toLong(`Current Period Users`))\n| fieldsRemove `Current\
+          \ Period Users`, `Current Period Views`\n| fieldsRename `Query volume` =\
+          \ `Current Period`"
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: -3
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    anomaly_detection_query:
+      name: anomaly_detection_query
+      input:
+        query: '// Check to see if logs, bizevents or spans are being queried directly
+          through the anomaly detection app
+
+          fetch dt.system.query_executions, from: now() - 30d
+
+          | filter client.internal_service_context == "dt.davis.anomaly-detector"
+
+          | filter table == "bizevents" OR table == "logs" OR table == "spans"
+
+          | summarize `Query Volume` = (sum(scanned_bytes)), by:{client.source, user.email}
+
+          | sort `Query Volume` desc'
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: -2
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    browser_clickpath_usage:
+      name: browser_clickpath_usage
+      input:
+        query: "timeseries {\n  availability_series = avg(dt.synthetic.browser.availability)\n\
+          },\nby: {\n  dt.entity.synthetic_test,\n  dt.entity.synthetic_location\n\
+          },\nfrom: now() - 30d\n| fieldsAdd monitor_name = entityAttr(dt.entity.synthetic_test,\
+          \ \"entity.name\")\n| summarize {\n    monitor_name = takeFirst(monitor_name),\n\
+          \    availability = avg(arrayAvg(availability_series))\n  }, by: { dt.entity.synthetic_test\
+          \ }\n| fieldsRename `Monitor_Name` = monitor_name, `Availability (%)` =\
+          \ availability\n\n| join [\nfetch dt.system.events\n| filter event.kind\
+          \ == \"BILLING_USAGE_EVENT\"\n| filter event.type == \"Browser Monitor or\
+          \ Clickpath\"\n| fieldsAdd entityName(dt.entity.synthetic_test)\n| summarize\
+          \ totalBilledActions = sum(billed_synthetic_action_count), by:{dt.entity.synthetic_test.name}\n\
+          | lookup [\n  fetch dt.entity.synthetic_test\n  | fieldsAdd assignedLocations,\
+          \ syntheticMonitorFrequency, steps\n  | fieldsAdd locationCount = arraySize(assignedLocations),\
+          \ stepsCount = arraySize(steps)\n  | fieldsRemove assignedLocations, steps\n\
+          \  ], sourceField: dt.entity.synthetic_test.name, lookupField: entity.name,\
+          \ fields: {locationCount, stepsCount, syntheticMonitorFrequency}\n| fieldsRename\
+          \ `Monitor_Name` = dt.entity.synthetic_test.name\n], on: {Monitor_Name},\
+          \ kind: outer\n| fieldsRename `Frequency` = right.syntheticMonitorFrequency,\
+          \ `Locations` = right.locationCount, `Steps` = right.stepsCount\n| filterOut\
+          \ isNull(Monitor_Name)"
+      action: dynatrace.automations:execute-dql-query
+      position:
+        x: -1
+        y: 1
+      description: Make use of Dynatrace Grail data in your workflow.
+      predecessors: []
+    send_license_optimisation_report:
+      name: send_license_optimisation_report
+      input:
+        cc: []
+        to: []
+        bcc: []
+        content: '{{ result(''create_report'')[''text''] }}'
+        subject: Dynatrace License Optimisation Report
+      action: dynatrace.email:send-email
+      position:
+        x: 0
+        y: 3
+      conditions:
+        states:
+          create_report: OK
+      description: Send email
+      predecessors:
+      - create_report
