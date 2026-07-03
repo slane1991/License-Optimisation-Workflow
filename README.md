@@ -8,6 +8,8 @@ The solution queries recent license consumption patterns, analyses potential opt
 
 The assessment is based on the last 30 days of available data.
 
+**Important caveat:** this will not fully work in Gen 3-only tenants yet, as some functions used in the queries are not currently fully supported there. In those tenants, the dashboard and Workflow may only partially work.
+
 ## Purpose
 
 The purpose of this solution is to help Dynatrace users and customer teams quickly identify areas where license consumption may be optimised without reducing observability value.
